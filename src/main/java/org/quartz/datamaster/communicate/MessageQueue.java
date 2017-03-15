@@ -1,9 +1,8 @@
-package org.quartz.datamaster.scheduler;
+package org.quartz.datamaster.communicate;
 
 import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
-import org.quartz.datamaster.scheduler.job.SchedulerService;
-import org.quartz.datamaster.scheduler.job.TaskBuilder;
+import org.quartz.datamaster.scheduler.SchedulerService;
 
 import java.util.LinkedList;
 

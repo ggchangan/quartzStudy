@@ -1,4 +1,4 @@
-package org.quartz.datamaster.scheduler.job;
+package org.quartz.datamaster.scheduler;
 
 import org.quartz.Job;
 import org.quartz.Scheduler;
@@ -19,14 +19,14 @@ public class SchedulerService {
         return scheduler;
     }
 
-    public static void accept(String taskInfo) throws SchedulerException {
-        TaskBuilder taskBuilder = new TaskBuilder(taskInfo);
+    public static void accept(Task task) throws SchedulerException {
+        TaskBuilder taskBuilder = new TaskBuilder(task);
         taskBuilder.builer();
         scheduler.scheduleJob(taskBuilder.getJobDetail(), taskBuilder.getTrigger());
     }
 
-    public static void accept(String taskInfo, Class<? extends Job> tClass) throws SchedulerException {
-        TaskBuilder taskBuilder = new TaskBuilder(taskInfo, tClass);
+    public static void accept(Task task, Class<? extends Job> tClass) throws SchedulerException {
+        TaskBuilder taskBuilder = new TaskBuilder(task, tClass);
         taskBuilder.builer();
         scheduler.scheduleJob(taskBuilder.getJobDetail(), taskBuilder.getTrigger());
     }

@@ -1,4 +1,4 @@
-package org.quartz.datamaster.scheduler.job;
+package org.quartz.datamaster.scheduler;
 
 import org.quartz.*;
 
@@ -10,6 +10,7 @@ import java.util.UUID;
  */
 public class TaskBuilder {
     public static final String EXECUTOR_KEY = "EXECUTOR";
+    public static final String SENDER_KEY = "SENDER";
     public static final int FUTURE_TIME = 5;
 
     //现在所有任务放在同一个个组，按照先后顺序被调度
@@ -17,22 +18,32 @@ public class TaskBuilder {
     private JobDetail jobDetail;
     private Trigger trigger;
 
-    private String executorStr;
+    //private String executorStr;
+    private Task task;
     private Class <? extends Job> executerClass;
+    private Class <? extends Sender> senderClass;
 
-    public TaskBuilder(String executorStr) {
-        this(executorStr, SchedulerJob.class);
+    public TaskBuilder(Task task) {
+        this(task, SchedulerJob.class);
     }
 
-    public TaskBuilder(String executorStr, Class<? extends Job> executerClass) {
-        this.executorStr = executorStr;
+    public TaskBuilder(Task task, Class<? extends Job> executerClass) {
+        this.task = task;
         this.executerClass = executerClass;
     }
 
+    public TaskBuilder(Task task, Class<? extends Job> executerClass, Class<? extends Sender> senderClass) {
+        this.task = task;
+        this.executerClass = executerClass;
+        this.senderClass = senderClass;
+    }
+
+    //TODO 任务状态传递，目前只传递字符串类型的任务Id,修改为传递对象
     public void builder(SimpleScheduleBuilder simpleScheduleBuilder) {
         jobDetail = JobBuilder.newJob(executerClass)
             .withIdentity(getJobId(), getJobGroup())
-            .usingJobData(EXECUTOR_KEY, executorStr)
+            .usingJobData(EXECUTOR_KEY, task.getTaskId())
+            .usingJobData(SENDER_KEY, senderClass.getName())
             .build();
         // get a "nice round" time a few seconds in the future...
         Date startTime = DateBuilder.nextGivenSecondDate(null, FUTURE_TIME);
@@ -58,19 +69,19 @@ public class TaskBuilder {
 
 
     public String getJobId() {
-        return UUID.randomUUID().toString();
+        return task.getTaskId();
     }
 
     public String getJobGroup() {
-        return "tGroup1";
+        return task.getTaskGroup();
     }
 
     public String getTriggerId() {
-        return UUID.randomUUID().toString();
+        return task.getTriggerId();
     }
 
     public String getTriggerGroup() {
-        return "tGroup1";
+        return task.getTriggerGroup();
     }
 
 }

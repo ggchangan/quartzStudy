@@ -1,12 +1,13 @@
 package org.quartz.datamaster.scheduler.job;
 
 import org.apache.log4j.Logger;
-import org.easymock.EasyMock;
 import org.junit.Test;
-import org.quartz.datamaster.scheduler.Sender;
+import org.quartz.datamaster.common.Service;
+import org.quartz.datamaster.scheduler.LocalAccepter;
+import org.quartz.datamaster.scheduler.SchedulerService;
+import org.quartz.datamaster.scheduler.Task;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -21,32 +22,67 @@ public class SchedulerServiceTest {
     }
 
     @org.junit.After public void tearDown() throws Exception {
-        Thread.sleep(10000);
         SchedulerService.shutdown();
     }
 
     @Test
     public void schedulerTest() throws Exception {
         //测试调度顺序
-        List<String> jobs = new ArrayList<String>();
-        jobs.add("job1");
-        jobs.add("job2");
-        jobs.add("job3");
+        List<Task> tasks = new ArrayList<>();
+        Task task1 = new TaskMock();
+        Task task2 = new TaskMock();
+        Task task3 = new TaskMock();
+        tasks.add(task1);
+        tasks.add(task2);
+        tasks.add(task3);
 
-        Sender senderMock = EasyMock.createMock(Sender.class);
-        EasyMock.expect(senderMock.start()).andStubReturn(true);
-
-        for (String job: jobs) {
-            SchedulerService.accept(job, SchedulerJobMock.class);
+        LocalAccepter accepter = new LocalAccepter();
+        accepter.setExecutor(SchedulerJobMock.class);
+        for (Task task: tasks) {
+            accepter.accept(task);
         }
 
         //保证被调度
         Thread.sleep(10000);
 
-        assertTrue(SchedulerJobMock.getJobs().containsAll(jobs) && jobs.containsAll(SchedulerJobMock.getJobs()));
-
+        Set<String> jobIds = new HashSet<>(SchedulerJobMock.getJobs());
+        assertEquals(3, jobIds.size());
+        jobIds.contains(task1.getTaskId());
+        jobIds.contains(task2.getTaskId());
+        jobIds.contains(task3.getTaskId());
 
         //并不能保证顺序调度
+    }
+
+    @Test
+    public void localSenderTest() throws Exception {
+        Task task = new TaskMock();
+        LocalAccepter accepter = new LocalAccepter();
+        accepter.accept(task);
+        //保证被调度
+        Thread.sleep(10000);
+    }
+
+    static class TaskMock implements Task {
+        @Override public String getTaskId() {
+            return UUID.randomUUID().toString();
+        }
+
+        @Override public String getTaskGroup() {
+            return "tGroup";
+        }
+
+        @Override public String getTriggerId() {
+            return UUID.randomUUID().toString();
+        }
+
+        @Override public String getTriggerGroup() {
+            return "tGroup";
+        }
+
+        @Override public Class<? extends Service> getTaskHander() {
+            return Service.class;
+        }
     }
 
     /*
