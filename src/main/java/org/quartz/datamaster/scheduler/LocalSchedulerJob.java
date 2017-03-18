@@ -16,9 +16,9 @@ public class LocalSchedulerJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         //任务被执行，需要转发相应任务信息
-        String executor = context.getJobDetail().getJobDataMap().getString(TaskBuilder.EXECUTOR_KEY);
-        logger.info(String.format("执行任务:%s", executor));
-        Sender sender = new LocalSender();
+        String taskId= context.getJobDetail().getJobDataMap().getString(TaskBuilder.EXECUTOR_KEY);
+        logger.info(String.format("执行任务:%s", taskId));
+        Sender sender = new LocalSender(taskId);
         sender.send();
     }
 }
