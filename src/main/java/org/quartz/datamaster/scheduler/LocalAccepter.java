@@ -12,11 +12,11 @@ public class LocalAccepter<T extends Task> implements Accepter<T> {
     private static final Logger logger = Logger.getLogger(LocalAccepter.class);
     private Class<? extends Job> executor;
 
-    @Override public void accept(T job) {
+    @Override public void accept(T task) {
         try {
-            if (executor == null) executor = SchedulerJob.class;
-            SchedulerService.accept(job, executor);
-            logger.info(String.format("接收到任务:%s.", job));
+            if (executor == null) executor = LocalSchedulerJob.class;
+            SchedulerService.accept(task, executor);
+            logger.info(String.format("接收到任务:%s.", task.getTaskId()));
         } catch (SchedulerException e) {
             logger.warn("接收任务失败！", e);
         }

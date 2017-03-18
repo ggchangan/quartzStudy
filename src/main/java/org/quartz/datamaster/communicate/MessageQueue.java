@@ -3,6 +3,7 @@ package org.quartz.datamaster.communicate;
 import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.quartz.datamaster.scheduler.SchedulerService;
+import org.quartz.datamaster.scheduler.Task;
 
 import java.util.LinkedList;
 
@@ -33,7 +34,7 @@ public class MessageQueue<T> {
                     while (!messageQueue.isEmpty()) {
                         T executor = messageQueue.poll();
                         try {
-                            SchedulerService.accept(executor.toString());
+                            SchedulerService.accept((Task) executor);
                         } catch (SchedulerException e) {
                             e.printStackTrace();
                             logger.warn(e.getMessage());

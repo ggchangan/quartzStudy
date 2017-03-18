@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.quartz.SchedulerException;
 import org.quartz.datamaster.common.Config;
 import org.quartz.datamaster.scheduler.SchedulerService;
+import org.quartz.datamaster.scheduler.Task;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,12 +36,14 @@ public class NetworkService<T> implements Runnable {
                     System.out.println(infoStr);
 
                     //TODO 可无限接收消息，接收服务不终止
+                    /*
                     try {
-                        SchedulerService.accept(infoStr);
+                        SchedulerService.accept((Task) infoStr);
                     } catch (SchedulerException e) {
                         e.printStackTrace();
                         logger.warn(e.getMessage());
                     }
+                    */
 
                     PrintWriter out = new PrintWriter(outStream, true);
                     String echoMsg = String.format("%s", "succeed");

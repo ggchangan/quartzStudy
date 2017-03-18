@@ -5,6 +5,6 @@ package org.quartz.datamaster.scheduler;
  */
 public class LocalSender implements Sender{
     @Override public void send() {
-
+        logger.info("开始局部发送.....");
     }
 }
