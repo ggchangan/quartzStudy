@@ -1,11 +1,11 @@
 package org.quartz.datamaster.scheduler.job;
 
 import org.apache.log4j.Logger;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.quartz.datamaster.common.Service;
-import org.quartz.datamaster.scheduler.LocalAccepter;
-import org.quartz.datamaster.scheduler.SchedulerService;
-import org.quartz.datamaster.scheduler.Task;
+import org.quartz.datamaster.scheduler.*;
 
 import java.util.*;
 
@@ -18,10 +18,18 @@ public class SchedulerServiceTest {
     private static final Logger logger = Logger.getLogger(SchedulerServiceTest.class);
 
     @org.junit.Before public void setUp() throws Exception {
-        SchedulerService.start();
     }
 
     @org.junit.After public void tearDown() throws Exception {
+    }
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        SchedulerService.start();
+    }
+
+    @AfterClass
+    public static void afterClass() throws Exception {
         SchedulerService.shutdown();
     }
 
@@ -32,17 +40,59 @@ public class SchedulerServiceTest {
         Task task1 = new TaskMock();
         Task task2 = new TaskMock();
         Task task3 = new TaskMock();
+        Task task4 = new TaskMock();
         tasks.add(task1);
         tasks.add(task2);
         tasks.add(task3);
+        tasks.add(task4);
 
         LocalAccepter accepter = new LocalAccepter();
         for (Task task: tasks) {
             accepter.accept(task);
         }
 
+        TaskStatus taskStatus = new DefaultTaskStatus();
+        List<Task> allTasks = taskStatus.allTasks();
+        System.out.println("输出所有任务：");
+        for (Task task: allTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        System.out.println("第一次获取正在运行的任务：");
+        List<Task> runningTasks = taskStatus.runningTasks();
+        for (Task task: runningTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        Thread.sleep(6000);
+
+        System.out.println("第二次获取正在运行的任务：");
+        runningTasks = taskStatus.runningTasks();
+        for (Task task: runningTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        //取消任务，未运行的任务会被取消
+        TaskManager taskManager = new DefaultTaskManager();
+        for (Task task: tasks) {
+            taskManager.delete(task);
+        }
+
+        Thread.sleep(1000);
+        System.out.println("第三次获取正在运行的任务：");
+        runningTasks = taskStatus.runningTasks();
+        for (Task task: runningTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        allTasks = taskStatus.allTasks();
+        System.out.println("输出所有任务：");
+        for (Task task: allTasks) {
+            System.out.println(task.getTaskId());
+        }
+
         //保证被调度
-        Thread.sleep(10000);
+        Thread.sleep(1000000);
 
         //并不能保证顺序调度
         //TODO 接收任务之后进行缓存
@@ -55,6 +105,38 @@ public class SchedulerServiceTest {
         accepter.accept(task);
         //保证被调度
         Thread.sleep(10000);
+    }
+
+    @Test
+    public void taskStatusTest() throws Exception {
+        TaskStatus taskStatus = new DefaultTaskStatus();
+        List<Task> allTasks = taskStatus.allTasks();
+        System.out.println("输出所有任务：");
+        for (Task task: allTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        System.out.println("第一次获取正在运行的任务：");
+        List<Task> runningTasks = taskStatus.runningTasks();
+        for (Task task: runningTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        Thread.sleep(1000);
+
+        System.out.println("第二次获取正在运行的任务：");
+        runningTasks = taskStatus.runningTasks();
+        for (Task task: runningTasks) {
+            System.out.println(task.getTaskId());
+        }
+
+        Thread.sleep(1000);
+
+        System.out.println("第三次获取正在运行的任务：");
+        runningTasks = taskStatus.runningTasks();
+        for (Task task: runningTasks) {
+            System.out.println(task.getTaskId());
+        }
     }
 
     static class TaskMock implements Task {
