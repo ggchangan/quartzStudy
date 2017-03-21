@@ -4,6 +4,8 @@ import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.quartz.datamaster.client.AnalysisJobService;
+import org.quartz.datamaster.client.CleaningJobService;
 import org.quartz.datamaster.common.Service;
 import org.quartz.datamaster.scheduler.*;
 
@@ -37,10 +39,10 @@ public class SchedulerServiceTest {
     public void localShedulerTest() throws Exception {
         //测试调度顺序
         List<Task> tasks = new ArrayList<>();
-        Task task1 = new TaskMock();
-        Task task2 = new TaskMock();
-        Task task3 = new TaskMock();
-        Task task4 = new TaskMock();
+        Task task1 = new CleaningTaskMock();
+        Task task2 = new AnalysisTaskMock();
+        Task task3 = new CleaningTaskMock();
+        Task task4 = new AnalysisTaskMock();
         tasks.add(task1);
         tasks.add(task2);
         tasks.add(task3);
@@ -100,7 +102,7 @@ public class SchedulerServiceTest {
 
     @Test
     public void localSenderTest() throws Exception {
-        Task task = new TaskMock();
+        Task task = new AnalysisTaskMock();
         LocalAccepter accepter = new LocalAccepter();
         accepter.accept(task);
         //保证被调度
@@ -139,7 +141,7 @@ public class SchedulerServiceTest {
         }
     }
 
-    static class TaskMock implements Task {
+    public static class CleaningTaskMock implements Task {
         private String taskId = UUID.randomUUID().toString();
         private String triggerId = UUID.randomUUID().toString();
 
@@ -160,10 +162,34 @@ public class SchedulerServiceTest {
         }
 
         @Override public Class<? extends Service> getTaskHander() {
-            return Service.class;
+            return CleaningJobService.class;
         }
     }
 
+    public static class AnalysisTaskMock implements Task {
+        private String taskId = UUID.randomUUID().toString();
+        private String triggerId = UUID.randomUUID().toString();
+
+        @Override public String getTaskId() {
+            return taskId;
+        }
+
+        @Override public String getTaskGroup() {
+            return "tGroup";
+        }
+
+        @Override public String getTriggerId() {
+            return triggerId;
+        }
+
+        @Override public String getTriggerGroup() {
+            return "tGroup";
+        }
+
+        @Override public Class<? extends Service> getTaskHander() {
+            return AnalysisJobService.class;
+        }
+    }
     /*
     //这种内部类方式，使得类地初始化失败，尚不知道具体原因
     static class SchedulerJobMock implements Job {

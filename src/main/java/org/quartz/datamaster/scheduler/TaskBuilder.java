@@ -35,7 +35,7 @@ public class TaskBuilder {
     public void builder(SimpleScheduleBuilder simpleScheduleBuilder) {
         jobDetail = JobBuilder.newJob(executerClass)
             .withIdentity(getJobId(), getJobGroup())
-            .usingJobData(EXECUTOR_KEY, task.getTaskId())
+            .usingJobData(EXECUTOR_KEY, task.getClass().getName())
             .build();
         // get a "nice round" time a few seconds in the future...
         Date startTime = DateBuilder.nextGivenSecondDate(null, FUTURE_TIME);

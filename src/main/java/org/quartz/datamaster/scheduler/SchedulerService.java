@@ -3,6 +3,7 @@ package org.quartz.datamaster.scheduler;
 import org.quartz.*;
 import org.quartz.datamaster.common.Service;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.jdbcjobstore.TriggerStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,21 @@ public class SchedulerService {
                         }
 
                         @Override public Class<? extends Service> getTaskHander() {
+                            try {
+                                String taskStr = scheduler.getJobDetail(jobKey).getJobDataMap().getString(TaskBuilder.EXECUTOR_KEY);
+                                Class<? extends Task> taskClass = (Class<? extends Task>) Class.forName(taskStr);
+                                Task task = taskClass.newInstance();
+                                Class<? extends Service> serviceClass = task.getTaskHander();
+                                return serviceClass;
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (InstantiationException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (SchedulerException e) {
+                                e.printStackTrace();
+                            }
                             return null;
                         }
                     };
@@ -98,6 +114,20 @@ public class SchedulerService {
                 }
 
                 @Override public Class<? extends Service> getTaskHander() {
+                    String taskStr = jobCtx.getJobDetail().getJobDataMap().getString(TaskBuilder.EXECUTOR_KEY);
+                    try {
+                        Class<? extends Task> taskClass = (Class<? extends Task>) Class.forName(taskStr);
+                        Task task = taskClass.newInstance();
+                        Class<? extends Service> serviceClass = task.getTaskHander();
+                        return serviceClass;
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+
                     return null;
                 }
             };

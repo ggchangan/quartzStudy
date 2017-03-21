@@ -10,12 +10,12 @@ import java.util.Date;
 /**
  * Created by magneto on 17-3-13.
  */
-public class CleaningJobService implements Service {
-    private static final Logger logger = Logger.getLogger(CleaningJobService.class);
+public class AnalysisJobService implements Service {
+    private static final Logger logger = Logger.getLogger(AnalysisJobService.class);
 
     @Override
     public void execute(){
-        String msg = String.format("Cleaning Job Service %s",
+        String msg = String.format("Analysis Job Service at %s",
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 
         logger.info(msg);
